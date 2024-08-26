@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microsoft Graph Profile Fetcher</title>
+    <script src="https://alcdn.msauth.net/browser/2.14.2/js/msal-browser.min.js"></script>
+</head>
+<body>
+    <h1>Microsoft Graph Profile Fetcher</h1>
+    <button id="login">Login with Microsoft</button>
+    <pre id="profile"></pre>
+
+    <script>
+        const msalConfig = {
+            auth: {
+                clientId: 'e8ff0ac9-b706-4f0c-b89e-e262eae05e42',  // Replace with your actual client ID
+                authority: 'https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47',  // Replace with your actual tenant ID
+                redirectUri: 'http://localhost:3000'
+            }
+        };
+
+        const msalInstance = new msal.PublicClientApplication(msalConfig);
+
+        document.getElementById('login').addEventListener('click', () => {
+            msalInstance.loginPopup({
+                scopes: ["user.read"]
+            }).then(response => {
+                console.log('Login response:', response);
+                fetchProfile(response.accessToken);
+            }).catch(error => {
+                console.error('Login error:', error);
+            });
+        });
+
+        function fetchProfile(token) {
+            fetch('https://graph.microsoft.com/v1.0/me', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch profile');
+                }
+                return response.json();
+            })
+            .then(profile => {
+                document.getElementById('profile').innerText = JSON.stringify(profile, null, 2);
+            })
+            .catch(error => {
+                console.error('Error fetching profile:', error);
+            });
+        }
+    </script>
+</body>
+</html>
