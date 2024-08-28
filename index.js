@@ -4,10 +4,7 @@ const fs = require('fs');
 require('dotenv').config();  // Load environment variables
 
 const app = express();
-const port = process.env.PORT || 3000;
-
-// Serve static files
-app.use(express.static(path.join(__dirname, 'public')));
+const port = process.env.PORT || 3050;
 
 // Helper function to inject environment variables into the HTML
 function injectEnvVariables(filePath, envVariables) {
