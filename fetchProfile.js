@@ -16,24 +16,35 @@ async function fetchProfile(accessToken) {
     }
 }
 
-async function fetchPeopleIndex(accessToken) {
+async function fetchPeopleSearch(accessToken) {
     const options = {
         headers: {
-            Authorization: `Bearer ${accessToken}`
-        },
-        params: {
-            $top: 50,
-            $select: 'displayName'
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
         }
     };
 
+    const body = {
+        requests: [
+            {
+                entityTypes: ["person"],
+                query: {
+                    queryString: "*"
+                },
+                from: 0,
+                size: 50,
+                fields: ["displayName"]
+            }
+        ]
+    };
+
     try {
-        const response = await axios.get(`${process.env.GRAPH_ENDPOINT}/v1.0/me/people`, options);
-        return response.data.value;
+        const response = await axios.post(`${process.env.GRAPH_ENDPOINT}/v1.0/search/query`, body, options);
+        return response.data.value[0].hitsContainers[0].hits.map(hit => hit.resource); // Extract the person objects from the response
     } catch (error) {
-        console.error('Error fetching people index:', error.response ? error.response.data : error.message);
+        console.error('Error fetching people using search:', error.response ? error.response.data : error.message);
         throw error;
     }
 }
 
-module.exports = { fetchProfile, fetchPeopleIndex };
+module.exports = { fetchProfile, fetchPeopleSearch };
